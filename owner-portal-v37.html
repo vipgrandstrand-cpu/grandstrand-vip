@@ -538,8 +538,15 @@ async function uploadTransactions(transactions, rejectedCount, totalCount) {
   });
 
   try {
-    var response = await fetch(BACKEND_URL, { method: 'POST', body: formData });
-    var result = await response.json();
+    // 25 second timeout for large CSV uploads
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, 25000);
+    var response = await fetch(BACKEND_URL, { method: 'POST', body: formData, signal: controller.signal });
+    clearTimeout(timeout);
+    var rawText = await response.text();
+    console.log('Backend response length:', rawText.length);
+    console.log('Backend response preview:', rawText.substring(0, 200));
+    var result = JSON.parse(rawText);
 
     if (result.status === 'SUCCESS') {
       if (result.lastSync) {
@@ -558,7 +565,10 @@ async function uploadTransactions(transactions, rejectedCount, totalCount) {
       document.getElementById('uploadBtn').innerText = 'Process and Upload';
     }
   } catch (err) {
-    showUploadResults({ success: false, error: 'Failed to upload: ' + err.message });
+    var msg = err.name === 'AbortError'
+      ? 'Upload timed out after 25 seconds. Your data may have been processed — check your dashboard before trying again.'
+      : 'Failed to upload: ' + err.message;
+    showUploadResults({ success: false, error: msg });
     document.getElementById('uploadBtn').disabled = false;
     document.getElementById('uploadBtn').innerText = 'Process and Upload';
   }
