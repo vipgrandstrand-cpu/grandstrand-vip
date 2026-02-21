@@ -843,7 +843,19 @@ async function initializePage() {
 
     if (savedData) {
       currentState = { ...currentState, ...savedData };
-      checkPassStatus();
+      // Re-apply URL bar params AFTER merging savedData
+      // savedData may have overwritten barOwnerID and barID with old session values
+      if (barOwner) currentState.barOwnerID = barOwner;
+      if (barId) currentState.barID = barId;
+      updateCardBadge();
+      // If bar changed from last session, log a new visit for this bar
+      const lastLoggedBar = savedData.lastScanBar || null;
+      if (barId && barId !== lastLoggedBar) {
+        console.log('New bar detected on return visit — logging visit for', barId);
+        await logVisit(barOwner, barId);
+      } else {
+        checkPassStatus();
+      }
     } else {
       const urlPhone = urlParams.get('ph');
       if (urlPhone) {
