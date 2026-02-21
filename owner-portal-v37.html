@@ -53,7 +53,7 @@ body, html {
 
 .hidden { display: none !important; }
 
-.form-group { margin-bottom: 20px; }
+.form-group { margin-bottom: 12px; }
 
 label {
   display: block;
@@ -121,7 +121,7 @@ input[type="password"]:focus {
 
 .upload-area:hover { background: #f0f3ff; border-color: #5568d3; }
 .upload-area.dragover { background: #e8ecff; border-color: #5568d3; }
-.upload-icon { font-size: 48px; margin-bottom: 12px; }
+.upload-icon { font-size: 32px; margin-bottom: 8px; }
 .upload-text { font-size: 16px; color: #667eea; font-weight: 600; margin-bottom: 8px; }
 .upload-hint { font-size: 13px; color: #999; }
 
@@ -508,9 +508,17 @@ async function processAndUpload() {
 
 async function confirmUpload() {
   document.getElementById('syncWarning').classList.add('hidden');
+  var confirmBtn = document.getElementById('confirmUploadBtn');
+  var cancelBtn = document.getElementById('cancelUploadBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.innerText = 'Uploading...';
+  cancelBtn.disabled = true;
   if (parsedTransactions) {
     await uploadTransactions(parsedTransactions, parsedRejected.length, parsedTotal);
   }
+  confirmBtn.disabled = false;
+  confirmBtn.innerText = 'Yes, Upload Anyway';
+  cancelBtn.disabled = false;
 }
 
 function cancelUpload() {
@@ -539,15 +547,20 @@ async function uploadTransactions(transactions, rejectedCount, totalCount) {
         if (result.barSyncs) currentSession.barSyncs = result.barSyncs;
       }
       showUploadResults({ success: true, uploaded: transactions.length, rejected: rejectedCount, total: totalCount, matched: result.matched || 0, unmatched: result.unmatched || 0 });
+      // Clear file after successful upload to prevent double submission
+      clearFile();
+      selectedFile = null;
+      parsedTransactions = null;
     } else {
       showUploadResults({ success: false, error: result.message || 'Upload failed' });
+      document.getElementById('uploadBtn').disabled = false;
+      document.getElementById('uploadBtn').innerText = 'Process and Upload';
     }
   } catch (err) {
     showUploadResults({ success: false, error: 'Failed to upload: ' + err.message });
+    document.getElementById('uploadBtn').disabled = false;
+    document.getElementById('uploadBtn').innerText = 'Process and Upload';
   }
-
-  document.getElementById('uploadBtn').disabled = false;
-  document.getElementById('uploadBtn').innerText = 'Process and Upload';
 }
 
 // ============================================
