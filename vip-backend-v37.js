@@ -373,11 +373,9 @@ function uploadPosData(params) {
     var ownerID = params.ownerID;
     var transactions = JSON.parse(params.transactions);
 
-    Logger.log('POS upload for owner:', ownerID, '| Transactions:', transactions.length);
-
-    // Debug: log first transaction to verify locationID field
+    debugLog('POS upload owner:' + ownerID + ' txns:' + transactions.length);
     if (transactions.length > 0) {
-      Logger.log('Sample transaction:', JSON.stringify(transactions[0]));
+      debugLog('Sample txn:' + JSON.stringify(transactions[0]));
     }
 
     // ---- STEP 1: Build code lookup map from Customer_Signups (O(n) not O(n*m)) ----
@@ -445,7 +443,7 @@ function uploadPosData(params) {
       customerMap[customer.phone].totalSpend += amount;
     }
 
-    Logger.log('barIDs collected:', JSON.stringify(Object.keys(barIDs)));
+    debugLog('barIDs:' + JSON.stringify(Object.keys(barIDs)));
 
     // ---- STEP 4: Count visits from Visit_Log ----
     var visitSheet = getSheet('Visit_Log');
@@ -883,6 +881,22 @@ function testSheetConnection() {
     Logger.log('A2 (Owner_ID): ' + a2);
     Logger.log('E2 (Workbook_URL): ' + e2);
   }
+}
+
+
+// ============================================
+// DEBUG HELPER - writes to Debug sheet
+// ============================================
+function debugLog(message) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Debug');
+    if (!sheet) {
+      sheet = ss.insertSheet('Debug');
+      sheet.getRange(1, 1, 1, 2).setValues([['Timestamp', 'Message']]);
+    }
+    sheet.appendRow([new Date(), message]);
+  } catch(e) {}
 }
 
 // ============================================
