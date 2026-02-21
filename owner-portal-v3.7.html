@@ -201,7 +201,7 @@ input[type="password"]:focus {
   <div class="logo">
     <h1>Grand Strand VIP</h1>
     <p>Owner Portal</p>
-    <p style="font-size:11px; color:#bbb; margin-top:4px;">v3.7.7</p>
+    <p style="font-size:11px; color:#bbb; margin-top:4px;">v3.7.8</p>
   </div>
 
   <!-- LOGIN VIEW -->
@@ -582,6 +582,9 @@ async function uploadTransactions(transactions, rejectedCount, totalCount) {
       } catch(e) {}
       showUploadResults({ success: true, uploaded: transactions.length, rejected: rejectedCount, total: totalCount, matched: result.matched || 0, unmatched: result.unmatched || 0 });
       isUploading = false;
+      var btn = document.getElementById('uploadBtn');
+      btn.disabled = true;
+      btn.innerText = 'Process and Upload';
       clearFile();
       selectedFile = null;
       parsedTransactions = null;
