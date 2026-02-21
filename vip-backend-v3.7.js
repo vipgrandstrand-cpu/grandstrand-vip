@@ -203,7 +203,7 @@ function newRegistration(params) {
     var lastName = params.lastName;
     var code = params.code;
     var barID = params.barID;
-    var ownerID = params.ownerID;
+    var ownerID = params.barOwnerID || params.ownerID;
 
     var signupsSheet = getSheet('Customer_Signups');
     var visitLogSheet = getSheet('Visit_Log');
@@ -246,7 +246,7 @@ function logVisit(params) {
     var phone = params.phone.replace(/\D/g, '');
     var code = params.code;
     var barID = params.barID;
-    var ownerID = params.ownerID;
+    var ownerID = params.barOwnerID || params.ownerID;
 
     var signupsSheet = getSheet('Customer_Signups');
     var visitLogSheet = getSheet('Visit_Log');
@@ -298,7 +298,7 @@ function redeemReward(params) {
     var code = params.code;
     var tier = params.tier;
     var barID = params.barID;
-    var ownerID = params.ownerID;
+    var ownerID = params.barOwnerID || params.ownerID;
     var visitsAtRedemption = params.visitsAtRedemption;
 
     var redemptionSheet = getSheet('Redemptions');
