@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
 <title>Grand Strand VIP - Owner Portal</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -200,7 +201,7 @@ input[type="password"]:focus {
   <div class="logo">
     <h1>Grand Strand VIP</h1>
     <p>Owner Portal</p>
-    <p style="font-size:11px; color:#bbb; margin-top:4px;">v3.7.5</p>
+    <p style="font-size:11px; color:#bbb; margin-top:4px;">v3.7.6</p>
   </div>
 
   <!-- LOGIN VIEW -->
@@ -559,10 +560,7 @@ async function uploadTransactions(transactions, rejectedCount, totalCount) {
     var timeout = setTimeout(function() { controller.abort(); }, 25000);
     var response = await fetch(BACKEND_URL, { method: 'POST', body: formData, signal: controller.signal });
     clearTimeout(timeout);
-    var rawText = await response.text();
-    console.log('Backend response length:', rawText.length);
-    console.log('Backend response preview:', rawText.substring(0, 200));
-    var result = JSON.parse(rawText);
+    var result = await response.json();
 
     if (result.status === 'SUCCESS') {
       if (result.lastSync) {
