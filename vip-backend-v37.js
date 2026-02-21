@@ -375,6 +375,11 @@ function uploadPosData(params) {
 
     Logger.log('POS upload for owner:', ownerID, '| Transactions:', transactions.length);
 
+    // Debug: log first transaction to verify locationID field
+    if (transactions.length > 0) {
+      Logger.log('Sample transaction:', JSON.stringify(transactions[0]));
+    }
+
     // ---- STEP 1: Build code lookup map from Customer_Signups (O(n) not O(n*m)) ----
     var signupsSheet = getSheet('Customer_Signups');
     var signupsData = signupsSheet.getDataRange().getValues();
@@ -439,6 +444,8 @@ function uploadPosData(params) {
 
       customerMap[customer.phone].totalSpend += amount;
     }
+
+    Logger.log('barIDs collected:', JSON.stringify(Object.keys(barIDs)));
 
     // ---- STEP 4: Count visits from Visit_Log ----
     var visitSheet = getSheet('Visit_Log');
@@ -512,7 +519,7 @@ function uploadPosData(params) {
 // ============================================
 
 function getOrCreateBarSyncSheet() {
-  var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Bar_Sync_Log');
   if (!sheet) {
     sheet = ss.insertSheet('Bar_Sync_Log');
@@ -875,5 +882,26 @@ function testSheetConnection() {
     var e2 = owners.getRange('E2').getValue();
     Logger.log('A2 (Owner_ID): ' + a2);
     Logger.log('E2 (Workbook_URL): ' + e2);
+  }
+}
+
+// ============================================
+// TEST BAR SYNC LOG
+// Run manually from Apps Script editor to test
+// ============================================
+function testBarSyncLog() {
+  Logger.log('=== testBarSyncLog START ===');
+  try {
+    var sheet = getOrCreateBarSyncSheet();
+    Logger.log('Sheet found/created: ' + sheet.getName());
+    updateBarSyncLog('johns-bars', 'marshwalk', new Date());
+    updateBarSyncLog('johns-bars', 'murphys', new Date());
+    updateBarSyncLog('johns-bars', 'tikibar', new Date());
+    Logger.log('Test rows written');
+    var map = buildBarSyncMap('johns-bars');
+    Logger.log('Bar sync map: ' + JSON.stringify(map));
+    Logger.log('=== testBarSyncLog END ===');
+  } catch (err) {
+    Logger.log('ERROR: ' + err.toString());
   }
 }
