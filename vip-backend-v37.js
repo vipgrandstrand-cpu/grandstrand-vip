@@ -373,10 +373,7 @@ function uploadPosData(params) {
     var ownerID = params.ownerID;
     var transactions = JSON.parse(params.transactions);
 
-    debugLog('POS upload owner:' + ownerID + ' txns:' + transactions.length);
-    if (transactions.length > 0) {
-      debugLog('Sample txn:' + JSON.stringify(transactions[0]));
-    }
+    Logger.log('POS upload for owner:', ownerID, '| Transactions:', transactions.length);
 
     // ---- STEP 1: Build code lookup map from Customer_Signups (O(n) not O(n*m)) ----
     var signupsSheet = getSheet('Customer_Signups');
@@ -443,8 +440,6 @@ function uploadPosData(params) {
       customerMap[customer.phone].totalSpend += amount;
     }
 
-    debugLog('barIDs:' + JSON.stringify(Object.keys(barIDs)));
-
     // ---- STEP 4: Count visits from Visit_Log ----
     var visitSheet = getSheet('Visit_Log');
     var visitData = visitSheet.getDataRange().getValues();
@@ -488,17 +483,11 @@ function uploadPosData(params) {
     }
 
     // ---- STEP 6: Update per-bar sync timestamps ----
-    debugLog('STEP 6 start - barIDs count:' + Object.keys(barIDs).length);
     for (var bid in barIDs) {
-      debugLog('Writing bar sync for:' + bid);
       updateBarSyncLog(ownerID, bid, now);
-      debugLog('Done writing:' + bid);
     }
-    debugLog('STEP 6 complete - calling updateLastCSVSync');
     updateLastCSVSync(ownerID, now);
-    debugLog('STEP 6 complete - calling syncOwnerDashboard');
     syncOwnerDashboardInternal(ownerID);
-    debugLog('STEP 6 all done');
 
     Logger.log('POS upload complete. Matched:', matched, '| Unmatched:', unmatched, '| Bars:', Object.keys(barIDs).join(','));
 
@@ -890,20 +879,6 @@ function testSheetConnection() {
 }
 
 
-// ============================================
-// DEBUG HELPER - writes to Debug sheet
-// ============================================
-function debugLog(message) {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName('Debug');
-    if (!sheet) {
-      sheet = ss.insertSheet('Debug');
-      sheet.getRange(1, 1, 1, 2).setValues([['Timestamp', 'Message']]);
-    }
-    sheet.appendRow([new Date(), message]);
-  } catch(e) {}
-}
 
 // ============================================
 // TEST BAR SYNC LOG
