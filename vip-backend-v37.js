@@ -488,11 +488,17 @@ function uploadPosData(params) {
     }
 
     // ---- STEP 6: Update per-bar sync timestamps ----
+    debugLog('STEP 6 start - barIDs count:' + Object.keys(barIDs).length);
     for (var bid in barIDs) {
+      debugLog('Writing bar sync for:' + bid);
       updateBarSyncLog(ownerID, bid, now);
+      debugLog('Done writing:' + bid);
     }
+    debugLog('STEP 6 complete - calling updateLastCSVSync');
     updateLastCSVSync(ownerID, now);
+    debugLog('STEP 6 complete - calling syncOwnerDashboard');
     syncOwnerDashboardInternal(ownerID);
+    debugLog('STEP 6 all done');
 
     Logger.log('POS upload complete. Matched:', matched, '| Unmatched:', unmatched, '| Bars:', Object.keys(barIDs).join(','));
 
