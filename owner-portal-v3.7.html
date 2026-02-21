@@ -555,12 +555,18 @@ async function uploadTransactions(transactions, rejectedCount, totalCount) {
   });
 
   try {
+    console.log('STEP 1: Starting fetch');
     // 25 second timeout for large CSV uploads
     var controller = new AbortController();
     var timeout = setTimeout(function() { controller.abort(); }, 25000);
     var response = await fetch(BACKEND_URL, { method: 'POST', body: formData, signal: controller.signal });
+    console.log('STEP 2: Fetch returned, status:', response.status);
     clearTimeout(timeout);
-    var result = await response.json();
+    var rawText = await response.text();
+    console.log('STEP 3: Got text length:', rawText.length);
+    console.log('STEP 4: Preview:', rawText.substring(0, 300));
+    var result = JSON.parse(rawText);
+    console.log('STEP 5: Parsed, status:', result.status);
 
     if (result.status === 'SUCCESS') {
       if (result.lastSync) {
