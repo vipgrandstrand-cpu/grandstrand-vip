@@ -200,6 +200,7 @@ input[type="password"]:focus {
   <div class="logo">
     <h1>Grand Strand VIP</h1>
     <p>Owner Portal</p>
+    <p style="font-size:11px; color:#bbb; margin-top:4px;">v3.7.4</p>
   </div>
 
   <!-- LOGIN VIEW -->
@@ -295,9 +296,12 @@ function init() {
   };
 }
 
-// Run init immediately and also on load just in case
-init();
-window.onload = init;
+// Run init once when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
 // ============================================
 // LOGIN
