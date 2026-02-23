@@ -457,7 +457,7 @@
 
   <div class="card">
     <div class="text-center mb-16">
-      <span class="card-badge">MARSHWALK VIP</span>
+      <span class="card-badge" id="barBadge">GRAND STRAND VIP</span>
     </div>
 
     <!-- VIEW: Loading -->
@@ -666,6 +666,12 @@ async function initializePage() {
 
     if (barOwner) currentState.barOwnerID = barOwner;
     if (barId) currentState.barID = barId;
+
+    // Set bar badge label dynamically from URL param
+    if (barId) {
+      const badgeEl = document.getElementById('barBadge');
+      if (badgeEl) badgeEl.innerText = barId.toUpperCase() + ' VIP';
+    }
 
     // Load config first (with timeout fallback)
     await loadConfig();
