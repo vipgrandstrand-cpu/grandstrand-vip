@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="robots" content="noindex, nofollow, noarchive">
 
 <style>
@@ -19,13 +16,13 @@
   .main-navigation {
     display: none !important;
   }
-
+  
   body, html {
     margin: 0 !important;
     padding: 0 !important;
     overflow-x: hidden !important;
   }
-
+  
   .entry-content,
   .page-content,
   article,
@@ -47,7 +44,7 @@
     min-height: 100vh;
     background: linear-gradient(135deg, #0077b6 0%, #00b4d8 50%, #48cae4 100%);
     font-family: 'Inter', sans-serif;
-    padding: 12px;
+    padding: 20px;
   }
 
   .container {
@@ -430,143 +427,6 @@
     letter-spacing: 6px;
   }
 
-
-  /* ========================================== */
-  /* PIN KEYPAD STYLES */
-  /* ========================================== */
-  .pin-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .pin-modal {
-    background: white;
-    border-radius: 28px;
-    padding: 32px 24px;
-    width: 100%;
-    max-width: 340px;
-    text-align: center;
-    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-  }
-
-  .pin-title {
-    font-size: 13px;
-    font-weight: 800;
-    color: #0077b6;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  .pin-reward-desc {
-    font-size: 16px;
-    font-weight: 700;
-    color: #03045e;
-    margin-bottom: 24px;
-  }
-
-  .pin-dots {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-
-  .pin-dot {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 3px solid #0077b6;
-    background: white;
-    transition: background 0.1s;
-  }
-
-  .pin-dot.filled {
-    background: #0077b6;
-  }
-
-  .pin-dot.error {
-    border-color: #dc2626;
-    background: #dc2626;
-    animation: shake 0.3s ease;
-  }
-
-  @keyframes shake {
-    0%   { transform: translateX(0); }
-    25%  { transform: translateX(-6px); }
-    50%  { transform: translateX(6px); }
-    75%  { transform: translateX(-6px); }
-    100% { transform: translateX(0); }
-  }
-
-  .pin-keypad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .pin-key {
-    background: #f0fbff;
-    border: 2px solid #e0f4f8;
-    border-radius: 16px;
-    padding: 20px 10px;
-    font-size: 26px;
-    font-weight: 900;
-    color: #03045e;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    transition: background 0.1s, transform 0.1s;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .pin-key:active {
-    background: #0077b6;
-    color: white;
-    transform: scale(0.94);
-  }
-
-  .pin-key.clear {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: #dc2626;
-    font-size: 18px;
-  }
-
-  .pin-key.confirm {
-    background: linear-gradient(135deg, #0077b6, #00b4d8);
-    border-color: #0077b6;
-    color: white;
-    font-size: 18px;
-  }
-
-  .pin-key.zero {
-    grid-column: 2;
-  }
-
-  .pin-error-msg {
-    font-size: 13px;
-    font-weight: 700;
-    color: #dc2626;
-    min-height: 20px;
-    margin-bottom: 12px;
-  }
-
-  .pin-cancel {
-    font-size: 13px;
-    color: #999;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-
   .hidden { display: none !important; }
 
   #qr-reader {
@@ -590,8 +450,7 @@
 
   <div class="card">
     <div class="text-center mb-16">
-      <!-- FIX 5: id added so JS can set this dynamically from URL bar_id param -->
-      <span class="card-badge" id="cardBadge">GRAND STRAND VIP</span>
+      <span class="card-badge">MARSHWALK VIP</span>
     </div>
 
     <!-- VIEW: Loading -->
@@ -621,10 +480,10 @@
         <input type="tel" id="regPhone" class="form-input" placeholder="(843) 555-1234" maxlength="14">
       </div>
 
-      <div class="wave-divider">~ ~ ~ ~ ~</div>
+      <div class="wave-divider">〰〰〰</div>
 
       <button class="btn btn-primary" onclick="handleRegistration()">
-        ACTIVATE MY PASS
+        🏄 ACTIVATE MY PASS
       </button>
     </div>
 
@@ -647,36 +506,6 @@
       </div>
 
       <div id="rewardBadges"></div>
-
-    <!-- PIN OVERLAY -->
-    <div id="pinOverlay" class="pin-overlay hidden">
-      <div class="pin-modal">
-        <div class="pin-title">Staff Verification Required</div>
-        <div class="pin-reward-desc" id="pinRewardDesc">Free Appetizer</div>
-        <div class="pin-dots">
-          <div class="pin-dot" id="dot0"></div>
-          <div class="pin-dot" id="dot1"></div>
-          <div class="pin-dot" id="dot2"></div>
-          <div class="pin-dot" id="dot3"></div>
-        </div>
-        <div class="pin-error-msg" id="pinErrorMsg"></div>
-        <div class="pin-keypad">
-          <button class="pin-key" onclick="pinKey('1')">1</button>
-          <button class="pin-key" onclick="pinKey('2')">2</button>
-          <button class="pin-key" onclick="pinKey('3')">3</button>
-          <button class="pin-key" onclick="pinKey('4')">4</button>
-          <button class="pin-key" onclick="pinKey('5')">5</button>
-          <button class="pin-key" onclick="pinKey('6')">6</button>
-          <button class="pin-key" onclick="pinKey('7')">7</button>
-          <button class="pin-key" onclick="pinKey('8')">8</button>
-          <button class="pin-key" onclick="pinKey('9')">9</button>
-          <button class="pin-key clear" onclick="pinClear()">CLR</button>
-          <button class="pin-key zero" onclick="pinKey('0')">0</button>
-          <button class="pin-key confirm" onclick="pinConfirm()">OK</button>
-        </div>
-        <div class="pin-cancel" onclick="pinCancel()">Cancel</div>
-      </div>
-    </div>
 
       <p style="text-align: center; font-size: 13px; color: #666; margin-top: 16px;">
         Show this code to your server when ordering
@@ -748,12 +577,12 @@
 
 <script>
 // ============================================
-// CONFIGURATION
+// ⚙️ YOUR CONFIGURATION - UPDATE THIS
 // ============================================
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5A_LYlaGPiXsHuBxEWpsB5pF9_GCB8xrEclxpm2ieoK6zf_VRm9EzbnIZNJz8hmpVsQ/exec";
 
 // ============================================
-// DEFAULT CONFIG (used if Google Sheets unreachable)
+// DEFAULT CONFIG (used if Google Sheets fails)
 // ============================================
 const DEFAULT_CONFIG = {
   expirationHours: 12,
@@ -763,39 +592,36 @@ const DEFAULT_CONFIG = {
   tier2Visits: 10,
   tier2Reward: 'Free Well Drink',
   tier3Visits: 20,
-  tier3Reward: '10% Off Entire Check',
-  redemptionPin: '0000'
+  tier3Reward: '10% Off Entire Check'
 };
 
 // ============================================
 // STATE
-// FIX 3: Added visitsByOwner and lastVisitByBar
-// replacing single global totalVisits
 // ============================================
 let currentState = {
   phone: null,
   code: null,
   firstName: null,
   lastName: null,
+  totalVisits: 0,
   lastScanTimestamp: null,
   lastScanBar: null,
   isActive: false,
   barOwnerID: null,
   barID: null,
-  config: { ...DEFAULT_CONFIG },
-  visitsByOwner: {},    // { 'johns-bars': 5 }  — per-owner punch counts
-  lastVisitByBar: {}    // { 'marshwalk': 1234567890 } — per-bar timestamps
+  config: { ...DEFAULT_CONFIG }
 };
 
 let qrScanner = null;
 let clockInterval = null;
 
 // ============================================
-// SAFE FETCH (with timeout)
+// SAFE FETCH (with timeout so page never hangs)
 // ============================================
 async function safeFetch(url, options = {}, timeoutMs = 5000) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  
   try {
     const response = await fetch(url, { ...options, signal: controller.signal });
     clearTimeout(timeout);
@@ -820,6 +646,7 @@ function formatPhoneNumber(e) {
 }
 
 async function initializePage() {
+  // SAFETY NET - if anything fails, show registration after 6 seconds
   const safetyTimer = setTimeout(() => {
     console.log('Safety timer triggered - showing registration');
     showRegistration();
@@ -833,29 +660,15 @@ async function initializePage() {
     if (barOwner) currentState.barOwnerID = barOwner;
     if (barId) currentState.barID = barId;
 
-    // FIX 5: Set card badge dynamically from bar_id URL param
-    updateCardBadge();
-
-    // FIX 1: loadConfig now sends a POST request
+    // Load config first (with timeout fallback)
     await loadConfig();
 
+    // Check localStorage for existing customer
     const savedData = loadFromLocalStorage();
 
     if (savedData) {
       currentState = { ...currentState, ...savedData };
-      // Re-apply URL bar params AFTER merging savedData
-      // savedData may have overwritten barOwnerID and barID with old session values
-      if (barOwner) currentState.barOwnerID = barOwner;
-      if (barId) currentState.barID = barId;
-      updateCardBadge();
-      // If bar changed from last session, log a new visit for this bar
-      const lastLoggedBar = savedData.lastScanBar || null;
-      if (barId && barId !== lastLoggedBar) {
-        console.log('New bar detected on return visit — logging visit for', barId);
-        await logVisit(barOwner, barId);
-      } else {
-        checkPassStatus();
-      }
+      checkPassStatus();
     } else {
       const urlPhone = urlParams.get('ph');
       if (urlPhone) {
@@ -874,21 +687,7 @@ async function initializePage() {
 }
 
 // ============================================
-// FIX 5: Dynamic card badge
-// ============================================
-function updateCardBadge() {
-  const barID = currentState.barID;
-  const badgeEl = document.getElementById('cardBadge');
-  if (!badgeEl) return;
-  if (barID) {
-    badgeEl.innerText = barID.replace(/-/g, ' ').toUpperCase() + ' VIP';
-  } else {
-    badgeEl.innerText = 'GRAND STRAND VIP';
-  }
-}
-
-// ============================================
-// FIX 3: localStorage — per-owner and per-bar keys
+// LOCAL STORAGE
 // ============================================
 function loadFromLocalStorage() {
   try {
@@ -897,53 +696,20 @@ function loadFromLocalStorage() {
     const firstName = localStorage.getItem('vip_fname');
     const lastName = localStorage.getItem('vip_lname');
     const lastScan = localStorage.getItem('vip_last_scan');
+    const totalVisits = localStorage.getItem('vip_total_visits');
 
-    if (!phone || !code) return null;
-
-    // Build visitsByOwner from stored keys
-    const visitsByOwner = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('vip_total_visits_')) {
-        const ownerID = key.replace('vip_total_visits_', '');
-        visitsByOwner[ownerID] = parseInt(localStorage.getItem(key) || '0');
-      }
+    if (phone && code) {
+      return {
+        phone,
+        code,
+        firstName,
+        lastName,
+        lastScanTimestamp: lastScan ? parseInt(lastScan) : null,
+        totalVisits: totalVisits ? parseInt(totalVisits) : 0
+      };
     }
-
-    // Build lastVisitByBar from stored keys
-    const lastVisitByBar = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('vip_last_visit_')) {
-        const barID = key.replace('vip_last_visit_', '');
-        lastVisitByBar[barID] = parseInt(localStorage.getItem(key) || '0');
-      }
-    }
-
-    // MIGRATION: convert old single vip_total_visits key to new format
-    const oldVisits = localStorage.getItem('vip_total_visits');
-    if (oldVisits && currentState.barOwnerID) {
-      const ownerID = currentState.barOwnerID;
-      if (!visitsByOwner[ownerID]) {
-        visitsByOwner[ownerID] = parseInt(oldVisits);
-        localStorage.setItem('vip_total_visits_' + ownerID, oldVisits);
-      }
-      localStorage.removeItem('vip_total_visits');
-      console.log('Migrated old visit count to per-owner format:', ownerID);
-    }
-
-    return {
-      phone,
-      code,
-      firstName,
-      lastName,
-      lastScanTimestamp: lastScan ? parseInt(lastScan) : null,
-      visitsByOwner,
-      lastVisitByBar
-    };
-
   } catch (err) {
-    console.error('localStorage load error:', err);
+    console.error('localStorage error:', err);
   }
   return null;
 }
@@ -955,20 +721,7 @@ function saveToLocalStorage() {
     localStorage.setItem('vip_fname', currentState.firstName);
     localStorage.setItem('vip_lname', currentState.lastName);
     localStorage.setItem('vip_last_scan', currentState.lastScanTimestamp);
-
-    // Save per-owner visit counts
-    if (currentState.visitsByOwner) {
-      for (const ownerID in currentState.visitsByOwner) {
-        localStorage.setItem('vip_total_visits_' + ownerID, currentState.visitsByOwner[ownerID]);
-      }
-    }
-
-    // Save per-bar last visit timestamps
-    if (currentState.lastVisitByBar) {
-      for (const barID in currentState.lastVisitByBar) {
-        localStorage.setItem('vip_last_visit_' + barID, currentState.lastVisitByBar[barID]);
-      }
-    }
+    localStorage.setItem('vip_total_visits', currentState.totalVisits);
   } catch (err) {
     console.error('localStorage save error:', err);
   }
@@ -1004,8 +757,8 @@ function showActivePass() {
   const name = (currentState.firstName || '') + ' ' + (currentState.lastName || '');
   document.getElementById('headerTitle').innerText = name.trim() || 'VIP Member';
   document.getElementById('codeValue').innerText = currentState.code || '----';
+  
   document.getElementById('securityClock').classList.remove('hidden');
-  updateCardBadge();
   startClock();
   renderPunchCard();
   showView('viewActive');
@@ -1022,7 +775,7 @@ function showDarkPass() {
 }
 
 // ============================================
-// PASS STATUS CHECK
+// PASS STATUS CHECK (uses localStorage only - no network needed)
 // ============================================
 function checkPassStatus() {
   const now = Date.now();
@@ -1031,22 +784,27 @@ function checkPassStatus() {
   const timeSinceScan = lastScan ? now - parseInt(lastScan) : Infinity;
 
   if (timeSinceScan < expirationMs) {
+    // Pass is still active - show it
     showActivePass();
+  } else if (currentState.barOwnerID && currentState.barID) {
+    // Pass is expired BUT customer arrived via NFC tap or QR scan (URL has bar params)
+    // They are physically at the bar - log the visit and reactivate immediately
+    logVisit(currentState.barOwnerID, currentState.barID);
   } else {
+    // Pass is expired and no bar params - customer opened from browser history
+    // They are not at the bar - show dark pass
     showDarkPass();
   }
 }
 
 // ============================================
-// FIX 3: Punch card rendering — reads per-owner count
+// PUNCH CARD RENDERING
 // ============================================
 function renderPunchCard() {
   const config = currentState.config;
+  const visits = currentState.totalVisits || 0;
 
-  // Read visits for current bar's owner only
-  const ownerID = currentState.barOwnerID || 'unknown';
-  const visits = (currentState.visitsByOwner && currentState.visitsByOwner[ownerID]) || 0;
-
+  // Find the next milestone
   let nextVisits = config.tier1Visits;
   let nextReward = config.tier1Reward;
 
@@ -1061,6 +819,7 @@ function renderPunchCard() {
     nextReward = config.tier2Reward;
   }
 
+  // Build circles
   let circles = '';
   for (let i = 0; i < nextVisits; i++) {
     circles += i < visits ? '⭐' : '☆';
@@ -1070,13 +829,13 @@ function renderPunchCard() {
   document.getElementById('punchProgress').innerText = `${visits} of ${nextVisits} visits`;
   document.getElementById('punchNextReward').innerText = `Next: ${nextReward}`;
 
-  renderBadges(visits);
+  // Show earned badges
+  renderBadges();
 }
 
 function renderDarkPunchCard() {
   const config = currentState.config;
-  const ownerID = currentState.barOwnerID || 'unknown';
-  const visits = (currentState.visitsByOwner && currentState.visitsByOwner[ownerID]) || 0;
+  const visits = currentState.totalVisits || 0;
   const nextVisits = config.tier1Visits;
 
   let circles = '';
@@ -1088,16 +847,9 @@ function renderDarkPunchCard() {
   document.getElementById('punchProgressDark').innerText = `${visits} of ${nextVisits} visits`;
 }
 
-// ============================================
-// FIX 3: renderBadges uses passed-in visit count
-// ============================================
-function renderBadges(visits) {
-  if (visits === undefined) {
-    const ownerID = currentState.barOwnerID || 'unknown';
-    visits = (currentState.visitsByOwner && currentState.visitsByOwner[ownerID]) || 0;
-  }
-
+function renderBadges() {
   const config = currentState.config;
+  const visits = currentState.totalVisits || 0;
   const container = document.getElementById('rewardBadges');
   container.innerHTML = '';
 
@@ -1123,130 +875,31 @@ function renderBadges(visits) {
 }
 
 // ============================================
-// REDEMPTION PIN SYSTEM
+// REWARD REDEMPTION
 // ============================================
-let pinState = {
-  entered: '',
-  tier: null,
-  rewardDesc: null,
-  attempts: 0,
-  locked: false,
-  lockTimeout: null
-};
+async function redeemReward(tier, rewardDesc) {
+  if (!confirm(`Redeem: ${rewardDesc}?\n\nPunch card will reset to 0 visits.`)) return;
 
-function redeemReward(tier, rewardDesc) {
-  if (pinState.locked) {
-    alert('PIN entry is locked. Please wait 60 seconds and try again.');
-    return;
-  }
-  pinState.entered = '';
-  pinState.tier = tier;
-  pinState.rewardDesc = rewardDesc;
-  document.getElementById('pinRewardDesc').innerText = rewardDesc;
-  document.getElementById('pinErrorMsg').innerText = '';
-  updatePinDots();
-  document.getElementById('pinOverlay').classList.remove('hidden');
-}
+  // Reset counter locally first
+  currentState.totalVisits = 0;
+  saveToLocalStorage();
+  renderPunchCard();
 
-function pinKey(digit) {
-  if (pinState.entered.length >= 4) return;
-  pinState.entered += digit;
-  updatePinDots();
-  if (pinState.entered.length === 4) {
-    setTimeout(pinConfirm, 200);
-  }
-}
+  // Log redemption to Google Sheets using URLSearchParams
+  const formData = new URLSearchParams({
+    type: 'REDEEM_REWARD',
+    phone: currentState.phone,
+    tier: tier,
+    barID: currentState.barID || 'unknown',
+    timestamp: Date.now()
+  });
 
-function pinClear() {
-  pinState.entered = '';
-  updatePinDots();
-  document.getElementById('pinErrorMsg').innerText = '';
-}
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    body: formData
+  }).catch(err => console.log('Redemption log failed:', err));
 
-function pinCancel() {
-  pinState.entered = '';
-  pinState.tier = null;
-  pinState.rewardDesc = null;
-  document.getElementById('pinOverlay').classList.add('hidden');
-}
-
-function updatePinDots() {
-  for (let i = 0; i < 4; i++) {
-    const dot = document.getElementById('dot' + i);
-    dot.classList.remove('filled', 'error');
-    if (i < pinState.entered.length) dot.classList.add('filled');
-  }
-}
-
-function pinError() {
-  for (let i = 0; i < 4; i++) {
-    document.getElementById('dot' + i).classList.add('error');
-  }
-  setTimeout(() => {
-    pinState.entered = '';
-    updatePinDots();
-  }, 600);
-}
-
-function pinConfirm() {
-  if (pinState.entered.length < 4) {
-    document.getElementById('pinErrorMsg').innerText = 'Enter all 4 digits';
-    return;
-  }
-
-  const correctPin = (currentState.config && currentState.config.redemptionPin) || '0000';
-
-  if (pinState.entered === correctPin) {
-    // PIN correct — redeem reward
-    pinState.attempts = 0;
-    document.getElementById('pinOverlay').classList.add('hidden');
-
-    const ownerID = currentState.barOwnerID || 'unknown';
-    if (!currentState.visitsByOwner) currentState.visitsByOwner = {};
-    const visitsAtRedemption = currentState.visitsByOwner[ownerID] || 0;
-    currentState.visitsByOwner[ownerID] = 0;
-    saveToLocalStorage();
-    renderPunchCard();
-
-    const formData = new URLSearchParams({
-      type: 'REDEEM_REWARD',
-      phone: currentState.phone,
-      code: currentState.code,
-      tier: pinState.tier,
-      barID: currentState.barID || 'unknown',
-      ownerID: ownerID,
-      visitsAtRedemption: visitsAtRedemption,
-      timestamp: Date.now()
-    });
-
-    fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData })
-      .catch(err => console.log('Redemption log failed:', err));
-
-    alert('Reward redeemed! Punch card has been reset.');
-    pinState.tier = null;
-    pinState.rewardDesc = null;
-
-  } else {
-    // Wrong PIN
-    pinState.attempts++;
-    pinError();
-
-    if (pinState.attempts >= 3) {
-      pinState.locked = true;
-      pinState.entered = '';
-      document.getElementById('pinOverlay').classList.add('hidden');
-      document.getElementById('pinErrorMsg').innerText = '';
-      alert('Too many incorrect attempts. PIN entry locked for 60 seconds.');
-      pinState.lockTimeout = setTimeout(() => {
-        pinState.locked = false;
-        pinState.attempts = 0;
-        console.log('PIN lock cleared');
-      }, 60000);
-    } else {
-      const remaining = 3 - pinState.attempts;
-      document.getElementById('pinErrorMsg').innerText = 'Incorrect PIN — ' + remaining + ' attempt' + (remaining === 1 ? '' : 's') + ' remaining';
-    }
-  }
+  alert(`✅ ${rewardDesc} redeemed!\nPunch card has been reset. Keep visiting to earn your next reward!`);
 }
 
 // ============================================
@@ -1276,30 +929,23 @@ function updateClock() {
 }
 
 // ============================================
-// FIX 1: loadConfig now sends POST request
+// CONFIG LOADING
 // ============================================
 async function loadConfig() {
   try {
     const barOwner = currentState.barOwnerID || 'default';
     const barID = currentState.barID || 'default';
 
-    const formData = new URLSearchParams({
-      type: 'GET_CONFIG',
-      bar_owner: barOwner,
-      bar_id: barID
-    });
-
     const response = await safeFetch(
-      GOOGLE_SCRIPT_URL,
-      { method: 'POST', body: formData },
+      `${GOOGLE_SCRIPT_URL}?type=GET_CONFIG&barOwner=${barOwner}&barID=${barID}`,
+      {},
       4000
     );
 
     const data = await response.json();
 
-    if (data.status === 'SUCCESS' && data.config) {
+    if (data.status === 'FOUND') {
       currentState.config = data.config;
-      console.log('Config loaded from sheet:', data.config);
     }
   } catch (err) {
     console.log('Config load failed, using defaults:', err.message);
@@ -1308,9 +954,7 @@ async function loadConfig() {
 }
 
 // ============================================
-// handleRegistration — checks backend first, then shows pass
-// New customer: create account, show pass instantly
-// Returning customer (wiped cache): restore existing pass
+// REGISTRATION
 // ============================================
 async function handleRegistration() {
   const firstName = document.getElementById('regFirstName').value.trim();
@@ -1327,71 +971,41 @@ async function handleRegistration() {
     return;
   }
 
-  // Show loading state while we check
-  const btn = document.querySelector('#viewRegistration .btn-primary');
-  btn.disabled = true;
-  btn.innerText = 'Checking...';
-
-  const ownerID = currentState.barOwnerID || 'unknown';
-  if (!currentState.visitsByOwner) currentState.visitsByOwner = {};
-  if (!currentState.lastVisitByBar) currentState.lastVisitByBar = {};
-
   const code = firstName.charAt(0).toUpperCase() + Math.floor(1000 + Math.random() * 9000);
 
   currentState.phone = phone;
+  currentState.code = code;
   currentState.firstName = firstName;
   currentState.lastName = lastName;
   currentState.lastScanTimestamp = Date.now();
+  currentState.totalVisits = 1;
   currentState.isActive = true;
 
+  saveToLocalStorage();
+
+  // Save to Google Sheets using URLSearchParams (form-urlencoded)
   const formData = new URLSearchParams({
     type: 'NEW_REGISTRATION',
     phone: phone,
     firstName: firstName,
     lastName: lastName,
     code: code,
-    ownerID: ownerID,
+    barOwnerID: currentState.barOwnerID || 'unknown',
     barID: currentState.barID || 'unknown',
     timestamp: Date.now()
   });
 
-  try {
-    const response = await safeFetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData }, 8000);
-    const data = await response.json();
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    body: formData
+  }).catch(err => console.log('Background sync failed:', err));
 
-    if (data.status === 'ALREADY_EXISTS') {
-      // Returning customer — restore their existing pass
-      console.log('Returning customer — restoring existing pass');
-      currentState.code = data.code;
-      const existingOwnerID = data.ownerID || ownerID;
-      if (!currentState.visitsByOwner[existingOwnerID]) {
-        currentState.visitsByOwner[existingOwnerID] = 0;
-      }
-      saveToLocalStorage();
-      showActivePass();
-      return;
-    }
-
-    // New customer — use generated code
-    currentState.code = code;
-    currentState.visitsByOwner[ownerID] = 1;
-    currentState.lastVisitByBar[currentState.barID || 'unknown'] = Date.now();
-    saveToLocalStorage();
-    showActivePass();
-
-  } catch (err) {
-    // Backend unreachable — proceed with generated code, sync later
-    console.log('Backend unreachable, proceeding locally:', err.message);
-    currentState.code = code;
-    currentState.visitsByOwner[ownerID] = 1;
-    currentState.lastVisitByBar[currentState.barID || 'unknown'] = Date.now();
-    saveToLocalStorage();
-    showActivePass();
-  }
+  // Show pass immediately
+  showActivePass();
 }
 
 // ============================================
-// PHONE CONFIRMATION / RESTORE
+// PHONE CONFIRMATION
 // ============================================
 async function confirmPhoneRestore() {
   showView('viewLoading');
@@ -1405,18 +1019,12 @@ async function confirmPhoneRestore() {
 
     const data = await response.json();
 
-    if (data.status === 'SUCCESS') {
-      currentState.code = data.customer.code;
-      currentState.firstName = data.customer.firstName;
-      currentState.lastName = data.customer.lastName;
-      currentState.lastScanTimestamp = data.customer.lastScan
-        ? new Date(data.customer.lastScan).getTime() : null;
-
-      // Restore visit count for their owner
-      const restoredOwnerID = data.customer.ownerID || currentState.barOwnerID || 'unknown';
-      if (!currentState.visitsByOwner) currentState.visitsByOwner = {};
-      currentState.visitsByOwner[restoredOwnerID] = data.customer.totalScans || 0;
-
+    if (data.status === 'FOUND') {
+      currentState.code = data.code;
+      currentState.firstName = data.firstName;
+      currentState.lastName = data.lastName;
+      currentState.totalVisits = data.totalVisits;
+      currentState.lastScanTimestamp = data.lastScanTimestamp;
       saveToLocalStorage();
       checkPassStatus();
     } else {
@@ -1441,8 +1049,8 @@ function startQRScan() {
 
   html5QrCode.start(
     { facingMode: "environment" },
-    {
-      fps: 10,
+    { 
+      fps: 10, 
       qrbox: { width: 250, height: 250 },
       aspectRatio: 1.0
     },
@@ -1451,6 +1059,7 @@ function startQRScan() {
       document.getElementById('scanStatus').innerHTML = '<span style="color:#059669;">✅ QR Code Detected!</span>';
 
       try {
+        // Try to parse as URL
         const url = new URL(decodedText);
         const scannedBarOwner = url.searchParams.get('bar_owner');
         const scannedBarID = url.searchParams.get('bar_id');
@@ -1464,13 +1073,15 @@ function startQRScan() {
       } catch (err) {
         console.error('QR parse error:', err);
         document.getElementById('scanStatus').innerHTML = '<span style="color:#dc2626;">❌ Invalid QR code format. Expected URL with bar_owner and bar_id parameters.</span>';
-
+        
+        // Show what was scanned for debugging
         setTimeout(() => {
           alert('QR Code Content:\n' + decodedText + '\n\nExpected format:\nhttps://yoursite.com/vip?bar_owner=X&bar_id=Y');
         }, 500);
       }
     },
     (errorMessage) => {
+      // Scanning errors (can be noisy, so we just log them)
       console.log('Scanner error:', errorMessage);
     }
   ).then(() => {
@@ -1489,39 +1100,24 @@ function cancelScan() {
   checkPassStatus();
 }
 
-// ============================================
-// FIX 2: logVisit — per-bar daily duplicate check
-// FIX 3: increments per-owner count
-// ============================================
 async function logVisit(barOwnerID, barID) {
   const now = Date.now();
 
-  if (!currentState.visitsByOwner) currentState.visitsByOwner = {};
-  if (!currentState.lastVisitByBar) currentState.lastVisitByBar = {};
-
-  const ownerID = barOwnerID || currentState.barOwnerID || 'unknown';
-
-  // FIX 2: Only count punch if not a duplicate for this specific bar today
+  // Update locally first
   if (!isDuplicateLocal(barID)) {
-    currentState.visitsByOwner[ownerID] = (currentState.visitsByOwner[ownerID] || 0) + 1;
-    currentState.lastVisitByBar[barID] = now;
+    currentState.totalVisits = (currentState.totalVisits || 0) + 1;
   }
 
   currentState.lastScanTimestamp = now;
   currentState.lastScanBar = barID;
-
-  // Update state so badge reflects scanned bar
-  currentState.barOwnerID = ownerID;
-  currentState.barID = barID;
-  updateCardBadge();
-
   saveToLocalStorage();
 
+  // Sync with Google Sheets using URLSearchParams
   const formData = new URLSearchParams({
     type: 'LOG_VISIT',
     phone: currentState.phone,
     code: currentState.code,
-    barOwnerID: ownerID,
+    barOwnerID: barOwnerID || currentState.barOwnerID,
     barID: barID || currentState.barID,
     timestamp: now
   });
@@ -1534,14 +1130,10 @@ async function logVisit(barOwnerID, barID) {
   showActivePass();
 }
 
-// ============================================
-// FIX 2: isDuplicateLocal — per-bar calendar day
-// ============================================
 function isDuplicateLocal(barID) {
   const today = new Date().toDateString();
-  const lastVisitTime = localStorage.getItem('vip_last_visit_' + barID);
-  if (!lastVisitTime) return false;
-  return new Date(parseInt(lastVisitTime)).toDateString() === today;
+  const lastScanDate = currentState.lastScanTimestamp ? new Date(currentState.lastScanTimestamp).toDateString() : null;
+  return (lastScanDate === today && currentState.lastScanBar === barID);
 }
 
 // ============================================
@@ -1555,7 +1147,7 @@ function formatPhone(phone) {
 </script>
 
 <div style="position:fixed; bottom:12px; right:12px; z-index:9999;">
-  <a href="https://vipgrandstrand-cpu.github.io/grandstrand-vip/owner-portal-v3.7.html" style="display:inline-block; padding:8px 14px; background:rgba(0,0,0,0.4); color:rgba(255,255,255,0.7); font-size:11px; font-family:sans-serif; border-radius:20px; text-decoration:none; border:1px solid rgba(255,255,255,0.2);">Owner Login</a>
+  <a href="https://thestrandvip.com/wp-content/uploads/2026/02/version3ownerportal.html?v=1" style="display:inline-block; padding:8px 14px; background:rgba(0,0,0,0.4); color:rgba(255,255,255,0.7); font-size:11px; font-family:sans-serif; border-radius:20px; text-decoration:none; border:1px solid rgba(255,255,255,0.2);">Owner Login</a>
 </div>
 
 </body>
