@@ -675,6 +675,10 @@ async function initializePage() {
 
     if (savedData) {
       currentState = { ...currentState, ...savedData };
+      // Re-apply URL params AFTER localStorage merge so the current bar always wins
+      // Without this, scanning tikibar after registering at marshwalk logs marshwalk again
+      if (barOwner) currentState.barOwnerID = barOwner;
+      if (barId) currentState.barID = barId;
       checkPassStatus();
     } else {
       const urlPhone = urlParams.get('ph');
