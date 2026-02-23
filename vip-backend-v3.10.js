@@ -1,26 +1,8 @@
 // ============================================
 // VIP BACKEND
-// Version 3.10
+// Version 3.9
 // Account: vipgrandstrand@gmail.com
-// Date: February 22, 2026
-// ============================================
-// FIXES IN 3.8:
-// FIX 1: Customer_Total_Spend uses phone lookup at write time
-//         instead of stored rowIndex — prevents data corruption
-//         if owner sorts/edits their dashboard sheet
-// FIX 2: saveConfig now writes all 12 columns including
-//         Redemption_PIN (column L) — prevents PIN being wiped
-//         when config is saved via admin UI
-// FIX 3: Added GET_BAR_SYNCS handler so owner portal can
-//         refresh per-bar stale detection after a CSV upload
-// FIXES IN 3.9:
-// FIX 4: uploadPosData now writes to Bar_Sync_Log after each
-//         CSV upload — updates LastSync timestamp per bar so
-//         stale detection actually reflects real upload times
-// FIXES IN 3.10:
-// FIX 5: uploadPosData now returns unmatchedCodes array so
-//         owner portal can display exactly which codes came
-//         through POS but didn't match any registered customer
+// Date: February 20, 2026
 // ============================================
 
 // ============================================
@@ -32,7 +14,7 @@ function doGet(e) {
     .createTextOutput(JSON.stringify({
       status: 'OK',
       service: 'Grand Strand VIP Backend',
-      version: '3.10',
+      version: '3.1',
       timestamp: new Date().toISOString()
     }))
     .setMimeType(ContentService.MimeType.JSON);
@@ -44,8 +26,8 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    var params = e.parameter;
-    var type = params.type;
+    const params = e.parameter;
+    const type = params.type;
 
     Logger.log('doPost called, type:', type);
 
@@ -57,8 +39,8 @@ function doPost(e) {
     if (type === 'REDEEM_REWARD') return redeemReward(params);
     if (type === 'SAVE_CONFIG') return saveConfig(params);
     if (type === 'UPLOAD_POS_DATA') return uploadPosData(params);
+    if (type === 'GET_BAR_SYNCS') return getBarSyncMap(params);
     if (type === 'SYNC_OWNER_DASHBOARD') return syncOwnerDashboard(params);
-    if (type === 'GET_BAR_SYNCS') return getBarSyncs(params); // FIX 3
 
     return jsonResponse({ status: 'ERROR', message: 'Unknown request type: ' + type });
 
@@ -74,11 +56,11 @@ function doPost(e) {
 
 function getConfig(params) {
   try {
-    var barOwnerID = params.bar_owner;
-    var barID = params.bar_id;
+    const barOwnerID = params.bar_owner;
+    const barID = params.bar_id;
 
-    var configSheet = getSheet('Config');
-    var data = configSheet.getDataRange().getValues();
+    const configSheet = getSheet('Config');
+    const data = configSheet.getDataRange().getValues();
 
     for (var i = 1; i < data.length; i++) {
       if (data[i][0] === barOwnerID && data[i][1] === barID) {
@@ -217,11 +199,11 @@ function lookupByPhone(params) {
 function newRegistration(params) {
   try {
     var phone = params.phone.replace(/\D/g, '');
-    var firstName = params.firstName;
-    var lastName = params.lastName;
+    var firstName = sanitize(params.firstName, 30);
+    var lastName = sanitize(params.lastName, 30);
     var code = params.code;
     var barID = params.barID;
-    var ownerID = params.ownerID;
+    var ownerID = params.barOwnerID || params.ownerID;
 
     var signupsSheet = getSheet('Customer_Signups');
     var visitLogSheet = getSheet('Visit_Log');
@@ -264,7 +246,7 @@ function logVisit(params) {
     var phone = params.phone.replace(/\D/g, '');
     var code = params.code;
     var barID = params.barID;
-    var ownerID = params.ownerID;
+    var ownerID = params.barOwnerID || params.ownerID;
 
     var signupsSheet = getSheet('Customer_Signups');
     var visitLogSheet = getSheet('Visit_Log');
@@ -316,7 +298,7 @@ function redeemReward(params) {
     var code = params.code;
     var tier = params.tier;
     var barID = params.barID;
-    var ownerID = params.ownerID;
+    var ownerID = params.barOwnerID || params.ownerID;
     var visitsAtRedemption = params.visitsAtRedemption;
 
     var redemptionSheet = getSheet('Redemptions');
@@ -338,9 +320,6 @@ function redeemReward(params) {
 
 // ============================================
 // SAVE CONFIG
-// FIX 2: Now writes all 12 columns including
-// Redemption_PIN (column L) to prevent PIN being
-// wiped when config is saved
 // ============================================
 
 function saveConfig(params) {
@@ -361,7 +340,7 @@ function saveConfig(params) {
       }
     }
 
-    // FIX 2: Write all 12 columns — column L (index 11) is Redemption_PIN
+    // FIX 2: Write all 12 columns including Redemption_PIN (column L index 11)
     var configRow = [
       barOwnerID, barID,
       params.expirationHours, params.dailyLimit,
@@ -369,7 +348,7 @@ function saveConfig(params) {
       params.tier2Visits, params.tier2Reward,
       params.tier3Visits, params.tier3Reward,
       now,
-      params.redemptionPin || existingPin  // preserve existing PIN if not passed
+      params.redemptionPin || existingPin
     ];
 
     var rowIndex = -1;
@@ -398,10 +377,6 @@ function saveConfig(params) {
 
 // ============================================
 // UPLOAD POS DATA
-// FIX 1: Customer_Total_Spend now uses phone
-// number lookup at write time instead of stored
-// rowIndex — safe against owner sorting/editing
-// their dashboard sheet
 // ============================================
 
 function uploadPosData(params) {
@@ -411,137 +386,126 @@ function uploadPosData(params) {
 
     Logger.log('POS upload for owner:', ownerID, '| Transactions:', transactions.length);
 
+    // ---- STEP 1: Build code lookup map from Customer_Signups (O(n) not O(n*m)) ----
     var signupsSheet = getSheet('Customer_Signups');
     var signupsData = signupsSheet.getDataRange().getValues();
 
-    var spendSheet = getSheet('Customer_Total_Spend');
-    var spendData = spendSheet.getDataRange().getValues();
-
-    // Build code->phone lookup map from signups (hash map for speed)
-    var codeToPhone = {};
-    var codeToName = {};
-    for (var s = 1; s < signupsData.length; s++) {
-      if (String(signupsData[s][5]) === ownerID) {
-        var sCode = String(signupsData[s][3]);
-        var sPhone = String(signupsData[s][0]).replace(/\D/g, '');
-        codeToPhone[sCode] = sPhone;
-        codeToName[sCode] = signupsData[s][1] + ' ' + signupsData[s][2];
-      }
-    }
-
-    // Build customerMap keyed by phone — no rowIndex stored
-    var customerMap = {};
-    for (var i = 1; i < spendData.length; i++) {
-      if (String(spendData[i][4]) === ownerID) {
-        var p = String(spendData[i][0]).replace(/\D/g, '');
-        customerMap[p] = {
-          name: spendData[i][1],
-          totalVisits: spendData[i][2] || 0,
-          totalSpend: parseFloat(spendData[i][3]) || 0
-          // NOTE: rowIndex intentionally NOT stored — FIX 1
+    var codeLookup = {}; // code -> { phone, name }
+    for (var i = 1; i < signupsData.length; i++) {
+      var rowOwner = String(signupsData[i][5]).trim();
+      var rowCode = String(signupsData[i][3]).trim();
+      if (rowOwner === ownerID && rowCode) {
+        codeLookup[rowCode] = {
+          phone: String(signupsData[i][0]).replace(/\D/g, ''),
+          name: signupsData[i][1] + ' ' + signupsData[i][2]
         };
       }
     }
 
+    // ---- STEP 2: Build spend map from existing Customer_Total_Spend rows ----
+    var spendSheet = getSheet('Customer_Total_Spend');
+    var spendData = spendSheet.getDataRange().getValues();
+
+    var customerMap = {}; // phone -> { name, totalSpend, rowIndex }
+    for (var j = 1; j < spendData.length; j++) {
+      if (String(spendData[j][4]).trim() === ownerID) {
+        var ph = String(spendData[j][0]).replace(/\D/g, '');
+        customerMap[ph] = {
+          name: spendData[j][1],
+          totalSpend: parseFloat(spendData[j][3]) || 0,
+          rowIndex: j + 1
+        };
+      }
+    }
+
+    // ---- STEP 3: Process transactions using hash lookup ----
     var matched = 0;
     var unmatched = 0;
-    var unmatchedCodes = []; // FIX 5: collect unmatched codes for reporting
+    var barIDs = {};
 
     for (var t = 0; t < transactions.length; t++) {
       var txn = transactions[t];
-      var txnPhone = codeToPhone[txn.code];
-      var txnName = codeToName[txn.code];
+      var code = String(txn.code || '').trim().toUpperCase();
+      var amount = parseFloat(txn.transactionTotal) || 0;
+      var barID = String(txn.locationID || '').trim().toLowerCase();
 
-      if (!txnPhone) {
+      // Track unique bar IDs in this upload
+      if (barID) barIDs[barID] = true;
+
+      var customer = codeLookup[code];
+      if (!customer) {
         unmatched++;
-        unmatchedCodes.push({ code: txn.code, locationID: txn.locationID, transactionID: txn.transactionID }); // FIX 5
         continue;
       }
 
       matched++;
 
-      if (!customerMap[txnPhone]) {
-        customerMap[txnPhone] = {
-          name: txnName,
-          totalVisits: 0,
-          totalSpend: 0
+      if (!customerMap[customer.phone]) {
+        customerMap[customer.phone] = {
+          name: customer.name,
+          totalSpend: 0,
+          rowIndex: -1
         };
       }
 
-      customerMap[txnPhone].totalSpend += parseFloat(txn.transactionTotal) || 0;
+      customerMap[customer.phone].totalSpend += amount;
     }
 
-    // Recalculate visit counts from Visit_Log
+    // ---- STEP 4: Count visits from Visit_Log ----
     var visitSheet = getSheet('Visit_Log');
     var visitData = visitSheet.getDataRange().getValues();
 
-    for (var ph in customerMap) {
-      customerMap[ph].totalVisits = 0;
-    }
-
+    var visitCounts = {};
     for (var v = 1; v < visitData.length; v++) {
-      if (String(visitData[v][4]) === ownerID) {
+      if (String(visitData[v][4]).trim() === ownerID) {
         var vp = String(visitData[v][1]).replace(/\D/g, '');
-        if (customerMap[vp]) {
-          customerMap[vp].totalVisits++;
-        }
+        visitCounts[vp] = (visitCounts[vp] || 0) + 1;
       }
     }
 
+    // ---- STEP 5: Batch write all rows at once ----
     var now = new Date();
-
-    // FIX 1: Reload spend sheet fresh and do phone lookup at write time
-    // This prevents row corruption if owner sorted their dashboard
-    var freshSpendData = spendSheet.getDataRange().getValues();
+    var newRows = [];
+    var updateRanges = [];
 
     for (var cp in customerMap) {
-      var customer = customerMap[cp];
-
+      var c = customerMap[cp];
       var row = [
         cp,
-        customer.name,
-        customer.totalVisits,
-        customer.totalSpend.toFixed(2),
+        c.name,
+        visitCounts[cp] || 0,
+        c.totalSpend.toFixed(2),
         ownerID,
         now
       ];
 
-      // Find the correct row by phone + ownerID at write time
-      var writeRowIndex = -1;
-      for (var wr = 1; wr < freshSpendData.length; wr++) {
-        var wrPhone = String(freshSpendData[wr][0]).replace(/\D/g, '');
-        if (wrPhone === cp && String(freshSpendData[wr][4]) === ownerID) {
-          writeRowIndex = wr + 1; // +1 because Sheets is 1-indexed
-          break;
-        }
-      }
-
-      if (writeRowIndex > 0) {
-        spendSheet.getRange(writeRowIndex, 1, 1, 6).setValues([row]);
+      if (c.rowIndex > 0) {
+        // Update existing row directly
+        spendSheet.getRange(c.rowIndex, 1, 1, 6).setValues([row]);
       } else {
-        spendSheet.appendRow(row);
+        newRows.push(row);
       }
     }
 
-    updateLastCSVSync(ownerID, now);
-
-    // FIX 4: Write per-bar sync timestamps to Bar_Sync_Log
-    var barsUploaded = {};
-    for (var bu = 0; bu < transactions.length; bu++) {
-      var bid = String(transactions[bu].locationID || '').trim().toLowerCase();
-      if (bid) barsUploaded[bid] = true;
+    // Append all new rows in one operation
+    if (newRows.length > 0) {
+      var lastRow = spendSheet.getLastRow();
+      spendSheet.getRange(lastRow + 1, 1, newRows.length, 6).setValues(newRows);
     }
-    updateBarSyncLog(ownerID, barsUploaded, now);
 
+    // ---- STEP 6: Update per-bar sync timestamps ----
+    for (var bid in barIDs) {
+      updateBarSyncLog(ownerID, bid, now);
+    }
+    updateLastCSVSync(ownerID, now);
     syncOwnerDashboardInternal(ownerID);
 
-    Logger.log('POS upload complete. Matched:', matched, '| Unmatched:', unmatched);
+    Logger.log('POS upload complete. Matched:', matched, '| Unmatched:', unmatched, '| Bars:', Object.keys(barIDs).join(','));
 
     return jsonResponse({
       status: 'SUCCESS',
       matched: matched,
       unmatched: unmatched,
-      unmatchedCodes: unmatchedCodes, // FIX 5: list of unmatched codes for portal display
       lastSync: now.toISOString()
     });
 
@@ -552,39 +516,63 @@ function uploadPosData(params) {
 }
 
 // ============================================
-// GET BAR SYNCS
-// FIX 3: Returns per-bar last sync timestamps
-// so owner portal stale detection stays accurate
-// after a CSV upload
+// PER-BAR SYNC LOG
+// Tracks last upload time per bar independently
+// Sheet: Bar_Sync_Log | Columns: Owner_ID, Bar_ID, Last_Sync
 // ============================================
 
-function getBarSyncs(params) {
+function getOrCreateBarSyncSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Bar_Sync_Log');
+  if (!sheet) {
+    sheet = ss.insertSheet('Bar_Sync_Log');
+    sheet.getRange(1, 1, 1, 3).setValues([['Owner_ID', 'Bar_ID', 'Last_Sync']]);
+    Logger.log('Bar_Sync_Log sheet created');
+  }
+  return sheet;
+}
+
+function updateBarSyncLog(ownerID, barID, timestamp) {
   try {
-    var ownerID = params.ownerID;
-
-    var barSyncSheet;
-    try {
-      barSyncSheet = getSheet('Bar_Sync_Log');
-    } catch (e) {
-      // Sheet doesn't exist yet — return empty map, not an error
-      return jsonResponse({ status: 'SUCCESS', barSyncs: {} });
-    }
-
-    var data = barSyncSheet.getDataRange().getValues();
-    var barSyncs = {};
-
-    // Bar_Sync_Log columns: OwnerID, BarID, LastSync
+    var sheet = getOrCreateBarSyncSheet();
+    var data = sheet.getDataRange().getValues();
     for (var i = 1; i < data.length; i++) {
-      if (String(data[i][0]) === ownerID) {
-        var barID = String(data[i][1]);
-        barSyncs[barID] = data[i][2] ? new Date(data[i][2]).toISOString() : null;
+      if (data[i][0] === ownerID && data[i][1] === barID) {
+        sheet.getRange(i + 1, 3).setValue(timestamp);
+        return;
       }
     }
-
-    return jsonResponse({ status: 'SUCCESS', barSyncs: barSyncs });
-
+    sheet.appendRow([ownerID, barID, timestamp]);
   } catch (err) {
-    Logger.log('getBarSyncs error:', err.toString());
+    Logger.log('updateBarSyncLog error:', err.toString());
+  }
+}
+
+function buildBarSyncMap(ownerID) {
+  try {
+    var sheet = getOrCreateBarSyncSheet();
+    var data = sheet.getDataRange().getValues();
+    var map = {};
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0] === ownerID) {
+        map[data[i][1]] = data[i][2] ? new Date(data[i][2]).toISOString() : null;
+      }
+    }
+    return map;
+  } catch (err) {
+    Logger.log('buildBarSyncMap error:', err.toString());
+    return {};
+  }
+}
+
+function getBarSyncMap(params) {
+  try {
+    var ownerID = params.ownerID;
+    return jsonResponse({
+      status: 'SUCCESS',
+      barSyncs: buildBarSyncMap(ownerID)
+    });
+  } catch (err) {
     return jsonResponse({ status: 'ERROR', message: err.toString() });
   }
 }
@@ -639,6 +627,7 @@ function syncOwnerDashboardInternal(ownerID) {
     syncTabToOwner(ownerSS, 'Config', getSheet('Config'), ownerID, 0);
     syncTabToOwner(ownerSS, 'Redemptions', getSheet('Redemptions'), ownerID, 6);
     syncTabToOwner(ownerSS, 'Customer_Total_Spend', getSheet('Customer_Total_Spend'), ownerID, 4);
+    syncTabToOwner(ownerSS, 'Bar_Sync_Log', getSheet('Bar_Sync_Log'), ownerID, 0);
 
     Logger.log('=== OWNER DASHBOARD SYNC COMPLETE ===');
 
@@ -704,50 +693,12 @@ function updateLastCSVSync(ownerID, timestamp) {
 }
 
 // ============================================
-// UPDATE BAR SYNC LOG
-// FIX 4: Writes LastSync timestamp per bar into
-// Bar_Sync_Log tab after each CSV upload so the
-// owner portal stale detection stays accurate
-// ============================================
-
-function updateBarSyncLog(ownerID, barsUploaded, timestamp) {
-  try {
-    var barSyncSheet = getSheet('Bar_Sync_Log');
-    var data = barSyncSheet.getDataRange().getValues();
-
-    for (var barID in barsUploaded) {
-      var rowIndex = -1;
-
-      // Find existing row for this owner+bar
-      for (var i = 1; i < data.length; i++) {
-        if (String(data[i][0]) === ownerID && String(data[i][1]).toLowerCase() === barID) {
-          rowIndex = i + 1;
-          break;
-        }
-      }
-
-      if (rowIndex > 0) {
-        // Update existing row
-        barSyncSheet.getRange(rowIndex, 3).setValue(timestamp);
-      } else {
-        // New bar — append row
-        barSyncSheet.appendRow([ownerID, barID, timestamp]);
-      }
-
-      Logger.log('Bar_Sync_Log updated:', ownerID, barID);
-    }
-  } catch (err) {
-    Logger.log('updateBarSyncLog error:', err.toString());
-  }
-}
-
-// ============================================
 // MANUAL SYNC TRIGGER
 // Change ownerID to sync any specific owner
 // ============================================
 
 function manualSyncOwner() {
-  var ownerID = 'johns-bars'; // Change this to the owner you want to sync
+  var ownerID = 'johns-bars';
   Logger.log('Manual sync triggered for:', ownerID);
   syncOwnerDashboardInternal(ownerID);
 }
@@ -773,6 +724,7 @@ function dailySyncAllOwners() {
       var ownerID = data[i][0];
       var status = data[i][6];
 
+      // Only sync ACTIVE owners with a valid ownerID
       if (!ownerID || status !== 'ACTIVE') {
         skipped++;
         continue;
@@ -912,6 +864,20 @@ function jsonResponse(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+// ============================================
+// SANITIZE INPUT
+// Prevents formula injection into Google Sheets
+// Strips leading =, +, -, @ which trigger formulas
+// Also trims whitespace and limits length
+// ============================================
+function sanitize(value, maxLength) {
+  if (value === null || value === undefined) return '';
+  var str = String(value).trim();
+  if (maxLength && str.length > maxLength) str = str.substring(0, maxLength);
+  str = str.replace(/^[=+\-@|%]+/, '');
+  return str;
+}
+
 function initializeSheets() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheets = ss.getSheets();
@@ -934,5 +900,28 @@ function testSheetConnection() {
     var e2 = owners.getRange('E2').getValue();
     Logger.log('A2 (Owner_ID): ' + a2);
     Logger.log('E2 (Workbook_URL): ' + e2);
+  }
+}
+
+
+
+// ============================================
+// TEST BAR SYNC LOG
+// Run manually from Apps Script editor to test
+// ============================================
+function testBarSyncLog() {
+  Logger.log('=== testBarSyncLog START ===');
+  try {
+    var sheet = getOrCreateBarSyncSheet();
+    Logger.log('Sheet found/created: ' + sheet.getName());
+    updateBarSyncLog('johns-bars', 'marshwalk', new Date());
+    updateBarSyncLog('johns-bars', 'murphys', new Date());
+    updateBarSyncLog('johns-bars', 'tikibar', new Date());
+    Logger.log('Test rows written');
+    var map = buildBarSyncMap('johns-bars');
+    Logger.log('Bar sync map: ' + JSON.stringify(map));
+    Logger.log('=== testBarSyncLog END ===');
+  } catch (err) {
+    Logger.log('ERROR: ' + err.toString());
   }
 }
