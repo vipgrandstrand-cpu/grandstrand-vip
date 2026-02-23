@@ -1133,6 +1133,10 @@ function cancelScan() {
 async function logVisit(barOwnerID, barID) {
   const now = Date.now();
 
+  // Always update currentState to the bar being visited right now
+  if (barOwnerID) currentState.barOwnerID = barOwnerID;
+  if (barID) currentState.barID = barID;
+
   // Update locally first
   if (!isDuplicateLocal(barID)) {
     currentState.totalVisits = (currentState.totalVisits || 0) + 1;
