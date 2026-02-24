@@ -1377,8 +1377,8 @@ async function handleRegistration() {
       // Returning customer — restore their existing pass with correct name from DB
       console.log('Returning customer — restoring existing pass');
       currentState.code = data.code;
-      currentState.firstName = data.firstName || firstName;
-      currentState.lastName = data.lastName || lastName;
+      currentState.firstName = data.firstName;
+      currentState.lastName = data.lastName;
       const existingOwnerID = data.ownerID || ownerID;
       if (!currentState.visitsByOwner[existingOwnerID]) {
         currentState.visitsByOwner[existingOwnerID] = 0;
