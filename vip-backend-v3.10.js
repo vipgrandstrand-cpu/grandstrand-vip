@@ -14,7 +14,7 @@ function doGet(e) {
     .createTextOutput(JSON.stringify({
       status: 'OK',
       service: 'Grand Strand VIP Backend',
-      version: '3.1',
+      version: '3.10',
       timestamp: new Date().toISOString()
     }))
     .setMimeType(ContentService.MimeType.JSON);
@@ -421,6 +421,7 @@ function uploadPosData(params) {
     // ---- STEP 3: Process transactions using hash lookup ----
     var matched = 0;
     var unmatched = 0;
+    var unmatchedCodes = [];
     var barIDs = {};
 
     for (var t = 0; t < transactions.length; t++) {
@@ -435,6 +436,9 @@ function uploadPosData(params) {
       var customer = codeLookup[code];
       if (!customer) {
         unmatched++;
+        if (unmatchedCodes.length < 50) {
+          unmatchedCodes.push({ code: code, locationID: txn.locationID || '', transactionID: txn.transactionID || '' });
+        }
         continue;
       }
 
@@ -506,6 +510,7 @@ function uploadPosData(params) {
       status: 'SUCCESS',
       matched: matched,
       unmatched: unmatched,
+      unmatchedCodes: unmatchedCodes,
       lastSync: now.toISOString()
     });
 
@@ -627,7 +632,7 @@ function syncOwnerDashboardInternal(ownerID) {
     syncTabToOwner(ownerSS, 'Config', getSheet('Config'), ownerID, 0);
     syncTabToOwner(ownerSS, 'Redemptions', getSheet('Redemptions'), ownerID, 6);
     syncTabToOwner(ownerSS, 'Customer_Total_Spend', getSheet('Customer_Total_Spend'), ownerID, 4);
-    syncTabToOwner(ownerSS, 'Bar_Sync_Log', getSheet('Bar_Sync_Log'), ownerID, 0);
+    syncTabToOwner(ownerSS, 'Bar_Sync_Log', getOrCreateBarSyncSheet(), ownerID, 0);
 
     Logger.log('=== OWNER DASHBOARD SYNC COMPLETE ===');
 
