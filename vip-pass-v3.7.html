@@ -1329,7 +1329,7 @@ async function handleRegistration() {
   }
 
   // Block all repeated digits (1111111111, 2222222222, etc)
-  if (/^(\d){9}$/.test(phone)) {
+  if (/^(\d)\1{9}$/.test(phone)) {
     alert('Please enter a valid phone number');
     return;
   }
@@ -1411,9 +1411,13 @@ async function confirmPhoneRestore() {
   showView('viewLoading');
 
   try {
+    const formData = new URLSearchParams({
+      type: 'LOOKUP_BY_PHONE',
+      phone: currentState.phone
+    });
     const response = await safeFetch(
-      `${GOOGLE_SCRIPT_URL}?type=LOOKUP_BY_PHONE&phone=${currentState.phone}`,
-      {},
+      GOOGLE_SCRIPT_URL,
+      { method: 'POST', body: formData },
       6000
     );
 
