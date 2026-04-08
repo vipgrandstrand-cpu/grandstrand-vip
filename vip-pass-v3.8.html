@@ -843,14 +843,10 @@ async function initializePage() {
       if (barOwner) currentState.barOwnerID = barOwner;
       if (barId) currentState.barID = barId;
       updateCardBadge();
-      // If bar changed from last session, log a new visit for this bar
-      const lastLoggedBar = savedData.lastScanBar || null;
-      if (barId && barId !== lastLoggedBar) {
-        console.log('New bar detected on return visit — logging visit for', barId);
-        await logVisit(barOwner, barId);
-      } else {
-        checkPassStatus();
-      }
+      // FIX 6: Page load always checks expiration first.
+      // Visits are only ever logged by a physical QR scan.
+      // Safari history, bookmarks, or any reload never logs a visit.
+      checkPassStatus();
     } else {
       const urlPhone = urlParams.get('ph');
       if (urlPhone) {
@@ -884,6 +880,8 @@ function updateCardBadge() {
 
 // ============================================
 // FIX 3: localStorage — per-owner and per-bar keys
+// FIX 6: lastScanBar now persisted to localStorage
+//         so expiration check survives page reloads
 // ============================================
 function loadFromLocalStorage() {
   try {
@@ -932,6 +930,8 @@ function loadFromLocalStorage() {
       code,
       firstName,
       lastName,
+      // FIX 6: load persisted lastScanBar so page reloads don't lose it
+      lastScanBar: localStorage.getItem('vip_last_scan_bar') || null,
       lastScanTimestamp: lastScan ? parseInt(lastScan) : null,
       visitsByOwner,
       lastVisitByBar
@@ -950,6 +950,8 @@ function saveToLocalStorage() {
     localStorage.setItem('vip_fname', currentState.firstName);
     localStorage.setItem('vip_lname', currentState.lastName);
     localStorage.setItem('vip_last_scan', currentState.lastScanTimestamp);
+    // FIX 6: persist lastScanBar so expiration check works after page reloads
+    localStorage.setItem('vip_last_scan_bar', currentState.lastScanBar || '');
 
     // Save per-owner visit counts
     if (currentState.visitsByOwner) {
