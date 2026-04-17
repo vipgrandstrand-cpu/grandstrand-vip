@@ -430,7 +430,6 @@
     letter-spacing: 6px;
   }
 
-
   /* ========================================== */
   /* PIN KEYPAD STYLES */
   /* ========================================== */
@@ -568,13 +567,6 @@
   }
 
   .hidden { display: none !important; }
-
-  #qr-reader {
-    width: 100%;
-    border-radius: 16px;
-    overflow: hidden;
-    margin: 20px 0;
-  }
 </style>
 
 <div class="container">
@@ -590,7 +582,6 @@
 
   <div class="card">
     <div class="text-center mb-16">
-      <!-- FIX 5: id added so JS can set this dynamically from URL bar_id param -->
       <span class="card-badge" id="cardBadge">GRAND STRAND VIP</span>
     </div>
 
@@ -648,35 +639,35 @@
 
       <div id="rewardBadges"></div>
 
-    <!-- PIN OVERLAY -->
-    <div id="pinOverlay" class="pin-overlay hidden">
-      <div class="pin-modal">
-        <div class="pin-title">Staff Verification Required</div>
-        <div class="pin-reward-desc" id="pinRewardDesc">Free Appetizer</div>
-        <div class="pin-dots">
-          <div class="pin-dot" id="dot0"></div>
-          <div class="pin-dot" id="dot1"></div>
-          <div class="pin-dot" id="dot2"></div>
-          <div class="pin-dot" id="dot3"></div>
+      <!-- PIN OVERLAY -->
+      <div id="pinOverlay" class="pin-overlay hidden">
+        <div class="pin-modal">
+          <div class="pin-title">Staff Verification Required</div>
+          <div class="pin-reward-desc" id="pinRewardDesc">Free Appetizer</div>
+          <div class="pin-dots">
+            <div class="pin-dot" id="dot0"></div>
+            <div class="pin-dot" id="dot1"></div>
+            <div class="pin-dot" id="dot2"></div>
+            <div class="pin-dot" id="dot3"></div>
+          </div>
+          <div class="pin-error-msg" id="pinErrorMsg"></div>
+          <div class="pin-keypad">
+            <button class="pin-key" onclick="pinKey('1')">1</button>
+            <button class="pin-key" onclick="pinKey('2')">2</button>
+            <button class="pin-key" onclick="pinKey('3')">3</button>
+            <button class="pin-key" onclick="pinKey('4')">4</button>
+            <button class="pin-key" onclick="pinKey('5')">5</button>
+            <button class="pin-key" onclick="pinKey('6')">6</button>
+            <button class="pin-key" onclick="pinKey('7')">7</button>
+            <button class="pin-key" onclick="pinKey('8')">8</button>
+            <button class="pin-key" onclick="pinKey('9')">9</button>
+            <button class="pin-key clear" onclick="pinClear()">CLR</button>
+            <button class="pin-key zero" onclick="pinKey('0')">0</button>
+            <button class="pin-key confirm" onclick="pinConfirm()">OK</button>
+          </div>
+          <div class="pin-cancel" onclick="pinCancel()">Cancel</div>
         </div>
-        <div class="pin-error-msg" id="pinErrorMsg"></div>
-        <div class="pin-keypad">
-          <button class="pin-key" onclick="pinKey('1')">1</button>
-          <button class="pin-key" onclick="pinKey('2')">2</button>
-          <button class="pin-key" onclick="pinKey('3')">3</button>
-          <button class="pin-key" onclick="pinKey('4')">4</button>
-          <button class="pin-key" onclick="pinKey('5')">5</button>
-          <button class="pin-key" onclick="pinKey('6')">6</button>
-          <button class="pin-key" onclick="pinKey('7')">7</button>
-          <button class="pin-key" onclick="pinKey('8')">8</button>
-          <button class="pin-key" onclick="pinKey('9')">9</button>
-          <button class="pin-key clear" onclick="pinClear()">CLR</button>
-          <button class="pin-key zero" onclick="pinKey('0')">0</button>
-          <button class="pin-key confirm" onclick="pinConfirm()">OK</button>
-        </div>
-        <div class="pin-cancel" onclick="pinCancel()">Cancel</div>
       </div>
-    </div>
 
       <p style="text-align: center; font-size: 13px; color: #666; margin-top: 16px;">
         Show this code to your server when ordering
@@ -684,6 +675,7 @@
     </div>
 
     <!-- VIEW: Dark Pass -->
+    <!-- NFC VERSION: QR scanner removed. Customer taps NFC puck at bar to reactivate. -->
     <div id="viewDark" class="hidden">
       <div class="text-center mb-16">
         <span class="status-dark">⏰ PASS EXPIRED</span>
@@ -701,12 +693,8 @@
       </div>
 
       <p style="text-align: center; font-size: 14px; color: #666; margin: 20px 0; line-height: 1.6;">
-        Visit the bar and scan the QR code to reactivate your pass
+        Visit the bar and tap the NFC puck to reactivate your pass
       </p>
-
-      <button class="btn btn-primary" onclick="startQRScan()">
-        📷 SCAN QR TO WAKE UP
-      </button>
     </div>
 
     <!-- VIEW: Phone Confirmation -->
@@ -728,23 +716,8 @@
       </p>
     </div>
 
-    <!-- VIEW: QR Scanner -->
-    <div id="viewScanner" class="hidden">
-      <h2 class="page-title">Scan Bar's QR Code</h2>
-      <p class="page-subtitle">Point camera at the QR code posted at the bar</p>
-      <div id="qr-reader"></div>
-      <div id="scanStatus" style="text-align: center; color: #0077b6; font-weight: 700; font-size: 14px;">
-        📷 Starting camera...
-      </div>
-      <button class="btn btn-primary mt-20" onclick="cancelScan()" style="background: #6b7280; box-shadow: 0 6px 0 #4b5563;">
-        ← BACK
-      </button>
-    </div>
-
   </div>
 </div>
-
-<script src="https://unpkg.com/html5-qrcode"></script>
 
 <script>
 // ============================================
@@ -753,7 +726,7 @@
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5A_LYlaGPiXsHuBxEWpsB5pF9_GCB8xrEclxpm2ieoK6zf_VRm9EzbnIZNJz8hmpVsQ/exec";
 
 // ============================================
-// DEFAULT CONFIG (used if Google Sheets unreachable)
+// DEFAULT CONFIG
 // ============================================
 const DEFAULT_CONFIG = {
   expirationHours: 12,
@@ -769,8 +742,6 @@ const DEFAULT_CONFIG = {
 
 // ============================================
 // STATE
-// FIX 3: Added visitsByOwner and lastVisitByBar
-// replacing single global totalVisits
 // ============================================
 let currentState = {
   phone: null,
@@ -783,11 +754,10 @@ let currentState = {
   barOwnerID: null,
   barID: null,
   config: { ...DEFAULT_CONFIG },
-  visitsByOwner: {},    // { 'johns-bars': 5 }  — per-owner punch counts
-  lastVisitByBar: {}    // { 'marshwalk': 1234567890 } — per-bar timestamps
+  visitsByOwner: {},
+  lastVisitByBar: {}
 };
 
-let qrScanner = null;
 let clockInterval = null;
 
 // ============================================
@@ -803,6 +773,10 @@ async function safeFetch(url, options = {}, timeoutMs = 5000) {
 
 // ============================================
 // PAGE INITIALIZATION
+// NFC VERSION: If bar_owner and bar_id are in the URL
+// this is a physical NFC tap — log the visit.
+// If no URL params this is a Safari history reload —
+// only check expiration, never log a visit.
 // ============================================
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('regPhone').addEventListener('input', formatPhoneNumber);
@@ -828,25 +802,28 @@ async function initializePage() {
     if (barOwner) currentState.barOwnerID = barOwner;
     if (barId) currentState.barID = barId;
 
-    // FIX 5: Set card badge dynamically from bar_id URL param
     updateCardBadge();
-
-    // FIX 1: loadConfig now sends a POST request
     await loadConfig();
 
     const savedData = loadFromLocalStorage();
 
     if (savedData) {
       currentState = { ...currentState, ...savedData };
-      // Re-apply URL bar params AFTER merging savedData
-      // savedData may have overwritten barOwnerID and barID with old session values
       if (barOwner) currentState.barOwnerID = barOwner;
       if (barId) currentState.barID = barId;
       updateCardBadge();
-      // FIX 6: Page load always checks expiration first.
-      // Visits are only ever logged by a physical QR scan.
-      // Safari history, bookmarks, or any reload never logs a visit.
-      checkPassStatus();
+
+      if (barOwner && barId) {
+        // Physical NFC tap — URL has bar params
+        // logVisit handles clock lock and duplicate punch rules
+        console.log('NFC tap detected — logging visit for', barId);
+        await logVisit(barOwner, barId);
+      } else {
+        // No bar params — Safari history or plain reload
+        // Never log a visit, only check expiration
+        console.log('No NFC params — checking pass status only');
+        checkPassStatus();
+      }
     } else {
       const urlPhone = urlParams.get('ph');
       if (urlPhone) {
@@ -865,7 +842,7 @@ async function initializePage() {
 }
 
 // ============================================
-// FIX 5: Dynamic card badge
+// DYNAMIC CARD BADGE
 // ============================================
 function updateCardBadge() {
   const barID = currentState.barID;
@@ -879,9 +856,9 @@ function updateCardBadge() {
 }
 
 // ============================================
-// FIX 3: localStorage — per-owner and per-bar keys
-// FIX 6: lastScanBar now persisted to localStorage
-//         so expiration check survives page reloads
+// LOCAL STORAGE
+// FIX 6: lastScanBar persisted so expiration
+// check survives page reloads
 // ============================================
 function loadFromLocalStorage() {
   try {
@@ -893,7 +870,6 @@ function loadFromLocalStorage() {
 
     if (!phone || !code) return null;
 
-    // Build visitsByOwner from stored keys
     const visitsByOwner = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -903,7 +879,6 @@ function loadFromLocalStorage() {
       }
     }
 
-    // Build lastVisitByBar from stored keys
     const lastVisitByBar = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -913,7 +888,6 @@ function loadFromLocalStorage() {
       }
     }
 
-    // MIGRATION: convert old single vip_total_visits key to new format
     const oldVisits = localStorage.getItem('vip_total_visits');
     if (oldVisits && currentState.barOwnerID) {
       const ownerID = currentState.barOwnerID;
@@ -930,7 +904,6 @@ function loadFromLocalStorage() {
       code,
       firstName,
       lastName,
-      // FIX 6: load persisted lastScanBar so page reloads don't lose it
       lastScanBar: localStorage.getItem('vip_last_scan_bar') || null,
       lastScanTimestamp: lastScan ? parseInt(lastScan) : null,
       visitsByOwner,
@@ -950,17 +923,14 @@ function saveToLocalStorage() {
     localStorage.setItem('vip_fname', currentState.firstName);
     localStorage.setItem('vip_lname', currentState.lastName);
     localStorage.setItem('vip_last_scan', currentState.lastScanTimestamp);
-    // FIX 6: persist lastScanBar so expiration check works after page reloads
     localStorage.setItem('vip_last_scan_bar', currentState.lastScanBar || '');
 
-    // Save per-owner visit counts
     if (currentState.visitsByOwner) {
       for (const ownerID in currentState.visitsByOwner) {
         localStorage.setItem('vip_total_visits_' + ownerID, currentState.visitsByOwner[ownerID]);
       }
     }
 
-    // Save per-bar last visit timestamps
     if (currentState.lastVisitByBar) {
       for (const barID in currentState.lastVisitByBar) {
         localStorage.setItem('vip_last_visit_' + barID, currentState.lastVisitByBar[barID]);
@@ -975,7 +945,7 @@ function saveToLocalStorage() {
 // VIEW MANAGEMENT
 // ============================================
 function showView(viewId) {
-  ['viewLoading', 'viewRegistration', 'viewActive', 'viewDark', 'viewPhoneConfirm', 'viewScanner'].forEach(id => {
+  ['viewLoading', 'viewRegistration', 'viewActive', 'viewDark', 'viewPhoneConfirm'].forEach(id => {
     document.getElementById(id).classList.add('hidden');
   });
   document.getElementById(viewId).classList.remove('hidden');
@@ -1035,12 +1005,10 @@ function checkPassStatus() {
 }
 
 // ============================================
-// FIX 3: Punch card rendering — reads per-owner count
+// PUNCH CARD RENDERING
 // ============================================
 function renderPunchCard() {
   const config = currentState.config;
-
-  // Read visits for current bar's owner only
   const ownerID = currentState.barOwnerID || 'unknown';
   const visits = (currentState.visitsByOwner && currentState.visitsByOwner[ownerID]) || 0;
 
@@ -1085,9 +1053,6 @@ function renderDarkPunchCard() {
   document.getElementById('punchProgressDark').innerText = `${visits} of ${nextVisits} visits`;
 }
 
-// ============================================
-// FIX 3: renderBadges uses passed-in visit count
-// ============================================
 function renderBadges(visits) {
   if (visits === undefined) {
     const ownerID = currentState.barOwnerID || 'unknown';
@@ -1194,7 +1159,6 @@ function pinConfirm() {
   const correctPin = (currentState.config && currentState.config.redemptionPin) || '0000';
 
   if (pinState.entered === correctPin) {
-    // PIN correct — redeem reward
     pinState.attempts = 0;
     document.getElementById('pinOverlay').classList.add('hidden');
 
@@ -1224,7 +1188,6 @@ function pinConfirm() {
     pinState.rewardDesc = null;
 
   } else {
-    // Wrong PIN
     pinState.attempts++;
     pinError();
 
@@ -1273,7 +1236,7 @@ function updateClock() {
 }
 
 // ============================================
-// FIX 1: loadConfig now sends POST request
+// LOAD CONFIG
 // ============================================
 async function loadConfig() {
   try {
@@ -1305,9 +1268,7 @@ async function loadConfig() {
 }
 
 // ============================================
-// handleRegistration — checks backend first, then shows pass
-// New customer: create account, show pass instantly
-// Returning customer (wiped cache): restore existing pass
+// REGISTRATION
 // ============================================
 async function handleRegistration() {
   const firstName = document.getElementById('regFirstName').value.trim();
@@ -1324,26 +1285,22 @@ async function handleRegistration() {
     return;
   }
 
-  // Block invalid US area codes - cannot start with 0 or 1
   if (phone[0] === '0' || phone[0] === '1') {
     alert('Please enter a valid US phone number');
     return;
   }
 
-  // Block all repeated digits (1111111111, 2222222222, etc)
   if (/^(\d)\1{9}$/.test(phone)) {
     alert('Please enter a valid phone number');
     return;
   }
 
-  // Block obvious fake sequential numbers
   const blockedNumbers = ['1234567890', '0987654321', '1231231234', '5555555555', '1232323232'];
   if (blockedNumbers.includes(phone)) {
     alert('Please enter a valid phone number');
     return;
   }
 
-  // Show loading state while we check
   const btn = document.querySelector('#viewRegistration .btn-primary');
   btn.disabled = true;
   btn.innerText = 'Checking...';
@@ -1376,7 +1333,6 @@ async function handleRegistration() {
     const data = await response.json();
 
     if (data.status === 'ALREADY_EXISTS') {
-      // Returning customer — restore their existing pass with correct name from DB
       console.log('Returning customer — restoring existing pass');
       currentState.code = data.code;
       currentState.firstName = data.firstName;
@@ -1386,12 +1342,10 @@ async function handleRegistration() {
         currentState.visitsByOwner[existingOwnerID] = 0;
       }
       saveToLocalStorage();
-      // Log the visit so a Visit_Log row is written and punch card increments
       await logVisit(existingOwnerID, currentState.barID || 'unknown');
       return;
     }
 
-    // New customer — use generated code
     currentState.code = code;
     currentState.visitsByOwner[ownerID] = 1;
     currentState.lastVisitByBar[currentState.barID || 'unknown'] = Date.now();
@@ -1399,7 +1353,6 @@ async function handleRegistration() {
     showActivePass();
 
   } catch (err) {
-    // Backend unreachable — proceed with generated code, sync later
     console.log('Backend unreachable, proceeding locally:', err.message);
     currentState.code = code;
     currentState.visitsByOwner[ownerID] = 1;
@@ -1435,7 +1388,6 @@ async function confirmPhoneRestore() {
       currentState.lastScanTimestamp = data.customer.lastScan
         ? new Date(data.customer.lastScan).getTime() : null;
 
-      // Restore visit count for their owner
       const restoredOwnerID = data.customer.ownerID || currentState.barOwnerID || 'unknown';
       if (!currentState.visitsByOwner) currentState.visitsByOwner = {};
       currentState.visitsByOwner[restoredOwnerID] = data.customer.totalScans || 0;
@@ -1454,67 +1406,19 @@ async function confirmPhoneRestore() {
 }
 
 // ============================================
-// QR SCANNING
-// ============================================
-function startQRScan() {
-  showView('viewScanner');
-
-  const html5QrCode = new Html5Qrcode("qr-reader");
-  qrScanner = html5QrCode;
-
-  html5QrCode.start(
-    { facingMode: "environment" },
-    {
-      fps: 10,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.0
-    },
-    async (decodedText) => {
-      console.log('QR Code detected:', decodedText);
-      document.getElementById('scanStatus').innerHTML = '<span style="color:#059669;">✅ QR Code Detected!</span>';
-
-      try {
-        const url = new URL(decodedText);
-        const scannedBarOwner = url.searchParams.get('bar_owner');
-        const scannedBarID = url.searchParams.get('bar_id');
-
-        console.log('Parsed:', { scannedBarOwner, scannedBarID });
-
-        html5QrCode.stop();
-        qrScanner = null;
-
-        await logVisit(scannedBarOwner, scannedBarID);
-      } catch (err) {
-        console.error('QR parse error:', err);
-        document.getElementById('scanStatus').innerHTML = '<span style="color:#dc2626;">❌ Invalid QR code format. Expected URL with bar_owner and bar_id parameters.</span>';
-
-        setTimeout(() => {
-          alert('QR Code Content:\n' + decodedText + '\n\nExpected format:\nhttps://yoursite.com/vip?bar_owner=X&bar_id=Y');
-        }, 500);
-      }
-    },
-    (errorMessage) => {
-      console.log('Scanner error:', errorMessage);
-    }
-  ).then(() => {
-    document.getElementById('scanStatus').innerText = '🔍 Point camera at QR code';
-  }).catch((err) => {
-    console.error('Scanner start error:', err);
-    document.getElementById('scanStatus').innerHTML = '<span style="color:#dc2626;">❌ Camera access denied. Please allow camera permissions.</span>';
-  });
-}
-
-function cancelScan() {
-  if (qrScanner) {
-    try { qrScanner.stop(); } catch (e) {}
-    qrScanner = null;
-  }
-  checkPassStatus();
-}
-
-// ============================================
-// FIX 2: logVisit — per-bar daily duplicate check
-// FIX 3: increments per-owner count
+// LOG VISIT
+// NFC VERSION — Two rules enforced:
+//
+// RULE 1 — 12hr clock locked to FIRST tap of the day.
+//   lastScanTimestamp is only set when pass is expired
+//   or has never been set. Subsequent taps while the
+//   pass is active never move the clock forward.
+//   First tap at 1pm = expires at 1am regardless of
+//   how many bars are visited afterward.
+//
+// RULE 2 — 1 punch per bar per calendar day.
+//   isDuplicateLocal() checks localStorage per bar.
+//   Backend has matching server-side duplicate check.
 // ============================================
 async function logVisit(barOwnerID, barID) {
   const now = Date.now();
@@ -1524,16 +1428,22 @@ async function logVisit(barOwnerID, barID) {
 
   const ownerID = barOwnerID || currentState.barOwnerID || 'unknown';
 
-  // FIX 2: Only count punch if not a duplicate for this specific bar today
+  // RULE 2: Only count punch if not a duplicate for this bar today
   if (!isDuplicateLocal(barID)) {
     currentState.visitsByOwner[ownerID] = (currentState.visitsByOwner[ownerID] || 0) + 1;
     currentState.lastVisitByBar[barID] = now;
   }
 
-  currentState.lastScanTimestamp = now;
-  currentState.lastScanBar = barID;
+  // RULE 1: Only set the 12hr clock on first tap (expired or never set).
+  // Once active, clock never moves regardless of subsequent taps or bars.
+  const expirationMs = (currentState.config.expirationHours || 12) * 60 * 60 * 1000;
+  const isExpired = !currentState.lastScanTimestamp ||
+    (now - parseInt(currentState.lastScanTimestamp) >= expirationMs);
+  if (isExpired) {
+    currentState.lastScanTimestamp = now;
+  }
 
-  // Update state so badge reflects scanned bar
+  currentState.lastScanBar = barID;
   currentState.barOwnerID = ownerID;
   currentState.barID = barID;
   updateCardBadge();
@@ -1558,7 +1468,7 @@ async function logVisit(barOwnerID, barID) {
 }
 
 // ============================================
-// FIX 2: isDuplicateLocal — per-bar calendar day
+// DUPLICATE CHECK — 1 punch per bar per calendar day
 // ============================================
 function isDuplicateLocal(barID) {
   const today = new Date().toDateString();
